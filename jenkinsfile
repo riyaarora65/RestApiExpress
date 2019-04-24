@@ -1,0 +1,25 @@
+pipeline {
+  agent any
+   stages {
+    stage('Clone ExpressNode project') {
+      steps {
+        git 'https://github.com/riyaarora65/RestApiExpress.git'
+      }
+    }
+    stage('Build Docker image') {
+      steps{
+        script {
+           docker.build "myproject:1" 
+           sh "docker images"
+        }
+      }
+    }
+    stage('Run Docker Container') {
+      steps{
+        sh "docker run -d --name myproject  -p 8080:8080 myproject:1"
+        sh "docker ps"
+      }
+    }     
+  }
+
+}
