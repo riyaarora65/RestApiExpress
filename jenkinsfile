@@ -1,25 +1,37 @@
 pipeline {
-  agent any
+  agent {
+    dockerfile {
+      label "us-east-1 && env-dev"
+      filename 'Dockerfile.agent'
+    }
+  }
    stages {
     stage('Clone ExpressNode project') {
       steps {
         git 'https://github.com/riyaarora65/RestApiExpress.git'
       }
     }
-    stage('Build Docker image') {
+    stage('Build Docker image'){
       steps{
-        script {
-           docker.build "myproject:1" 
-           sh "docker images"
-        }
+          milestone(10)
+          sh 'node --version'
+          sh 'npm install'
       }
     }
-    stage('Run Docker Container') {
-      steps{
-        sh "docker run -d --name myproject  -p 8080:8080 myproject:1"
-        sh "docker ps"
+    stage('Test'){
+      steps {
+        sh 'npm test'
+      }
+    }
+    stage('JUnit Reports'){
+      steps {
+        junit testResults: 'test-reports/junit.xml,src/test-reports/junit.xml'
       }
     }     
   }
-
+  post {
+    always{
+      deleteDir()
+    }
+  }
 }
